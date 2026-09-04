@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Itinerary API</title>
+</head>
+<body>
+    <h1>Travel Itinerary API</h1>
+
+    <section>
+        <h2>Overview</h2>
+        <p>
+            This API generates a structured travel itinerary for a given destination using a large language model.
+            The response is returned as JSON with a fixed schema.
+        </p>
+    </section>
+
+    <section>
+        <h2>API Endpoint</h2>
+        <p>
+            <code>GET http://localhost:8000/api/v1/itinerary</code>
+        </p>
+    </section>
+
+    <section>
+        <h2>Query Parameters</h2>
+        <ul>
+            <li>
+                <strong>destination</strong> (required): The destination to generate an itinerary for.
+                <br>
+                Example: <code>destination=Kyoto</code>
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Example Request</h2>
+        <pre>
+curl "http://localhost:3000/api/v1/itinerary?destination=Lisbon"
+        </pre>
+    </section>
+
+    <section>
+        <h2>Response Format</h2>
+        <p>
+            The API returns a JSON object with the following structure:
+        </p>
+        <pre>
+{
+  "destination": "Lisbon",
+  "price_range": "mid-range",
+  "ideal_visit_times": [
+    "April–May",
+    "September–October"
+  ],
+  "top_attractions": [
+    "Belém Tower",
+    "Alfama District",
+    "Jerónimos Monastery",
+    "Tram 28"
+  ]
+}
+        </pre>
+    </section>
+
+    <section>
+        <h2>Error Responses</h2>
+        <ul>
+            <li><strong>400 Bad Request</strong>: Missing or invalid destination parameter</li>
+            <li><strong>502 Bad Gateway</strong>: Error generating itinerary from the language model</li>
+        </ul>
+    </section>
+
+</body>
+</html>
