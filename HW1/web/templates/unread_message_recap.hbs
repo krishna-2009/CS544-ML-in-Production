@@ -1,0 +1,22 @@
+<div class="unread-recap-summary rendered_markdown">
+    {{rendered_markdown summary}}
+</div>
+{{#if has_references}}
+    <h4 class="unread-recap-heading">{{t "Unread messages"}}</h4>
+    {{#if truncated}}
+        <p class="unread-recap-note">
+            <em>{{t "Only the oldest 100 unread messages are included."}}</em>
+        </p>
+    {{/if}}
+    <ul class="unread-recap-references">
+        {{#each references}}
+            <li>
+                <a href="{{this.link}}" title="{{t 'Go to this message'}}">
+                    {{this.sender}}
+                    &mdash;
+                    {{this.topic}}
+                </a>
+            </li>
+        {{/each}}
+    </ul>
+{{/if}}

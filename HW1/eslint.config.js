@@ -1,0 +1,372 @@
+// @ts-check
+
+import {FlatCompat} from "@eslint/eslintrc";
+import js from "@eslint/js";
+import confusingBrowserGlobals from "confusing-browser-globals";
+import {defineConfig} from "eslint/config";
+import prettier from "eslint-config-prettier";
+import {configs as astroConfigs} from "eslint-plugin-astro";
+import formatjs from "eslint-plugin-formatjs";
+import * as importX from "eslint-plugin-import-x";
+import * as mdx from "eslint-plugin-mdx";
+import noJquery from "eslint-plugin-no-jquery";
+import promise from "eslint-plugin-promise";
+import unicorn from "eslint-plugin-unicorn";
+import globals from "globals";
+import tseslint from "typescript-eslint";
+
+const compat = new FlatCompat({baseDirectory: import.meta.dirname});
+
+export default defineConfig(
+    {
+        // This is intended for generated files and vendored third-party files.
+        // For our source code, instead of adding files here, consider using
+        // specific eslint-disable comments in the files themselves.
+        ignores: [
+            "**/.astro",
+            "**/.pnpm-store",
+            "**/.venv",
+            "**/dist",
+            "docs/_build",
+            "static/generated/*",
+            "!static/generated/README.md",
+            "static/webpack-bundles",
+            "var",
+            "web/generated/*",
+            "!web/generated/README.md",
+            "web/third",
+            "webpack-stats-production.json",
+        ],
+    },
+    js.configs.recommended,
+    importX.flatConfigs.recommended,
+    {
+        files: ["**/*.{,[cm]}[jt]s{,x}"],
+        extends: [
+            ...compat.config(noJquery.configs.recommended),
+            ...compat.config(noJquery.configs.deprecated),
+        ],
+    },
+    unicorn.configs.recommended,
+    promise.configs["flat/recommended"],
+    prettier,
+    tseslint.configs.strictTypeChecked,
+    tseslint.configs.stylisticTypeChecked,
+    mdx.flat,
+    {
+        files: ["**/*.{,[cm]}ts{,x}"],
+        extends: [importX.flatConfigs.typescript],
+        rules: {
+            "unicorn/require-array-sort-compare": "off",
+            "@typescript-eslint/require-array-sort-compare": "error",
+            "unicorn/no-useless-template-literals": "off",
+            "@typescript-eslint/no-unnecessary-template-expression": "error",
+        },
+    },
+    {
+        plugins: {
+            formatjs,
+            "no-jquery": noJquery,
+        },
+        linterOptions: {
+            reportUnusedDisableDirectives: true,
+        },
+        languageOptions: {
+            ecmaVersion: "latest",
+            globals: {
+                JQuery: "readonly",
+            },
+            parserOptions: {
+                projectService: true,
+                tsConfigRootDir: import.meta.dirname,
+                warnOnUnsupportedTypeScriptVersion: false,
+            },
+        },
+        settings: {
+            formatjs: {
+                additionalFunctionNames: ["$t", "$t_html"],
+            },
+            "no-jquery": {
+                collectionReturningPlugins: {expectOne: "always"},
+                variablePattern: "^\\$(?!t$|t_html$).",
+            },
+        },
+        rules: {
+            "@typescript-eslint/consistent-return": "error",
+            "@typescript-eslint/consistent-type-assertions": ["error", {assertionStyle: "never"}],
+            "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+            "@typescript-eslint/consistent-type-imports": "error",
+            "@typescript-eslint/explicit-function-return-type": ["error", {allowExpressions: true}],
+            "@typescript-eslint/member-ordering": "error",
+            "@typescript-eslint/method-signature-style": "error",
+            "@typescript-eslint/no-loop-func": "error",
+            "@typescript-eslint/no-misused-spread": "off",
+            "@typescript-eslint/no-non-null-assertion": "off",
+            "@typescript-eslint/no-restricted-imports": [
+                "error",
+                {paths: [{name: "zod", message: "Use zod/mini."}]},
+            ],
+            "@typescript-eslint/no-unnecessary-condition": "off",
+            "@typescript-eslint/no-unnecessary-qualifier": "error",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {args: "all", argsIgnorePattern: "^_", ignoreRestSiblings: true},
+            ],
+            "@typescript-eslint/no-use-before-define": [
+                "error",
+                {functions: false, variables: false},
+            ],
+            "@typescript-eslint/parameter-properties": "error",
+            "@typescript-eslint/promise-function-async": "error",
+            "@typescript-eslint/restrict-plus-operands": ["error", {}],
+            "@typescript-eslint/restrict-template-expressions": ["error", {}],
+            "array-callback-return": "error",
+            "arrow-body-style": "error",
+            curly: "error",
+            eqeqeq: "error",
+            "formatjs/enforce-default-message": ["error", "literal"],
+            "formatjs/enforce-placeholders": [
+                "error",
+                {ignoreList: ["b", "code", "em", "i", "kbd", "p", "strong"]},
+            ],
+            "formatjs/no-id": "error",
+            "guard-for-in": "error",
+            "import-x/extensions": ["error", "ignorePackages"],
+            "import-x/first": "error",
+            "import-x/newline-after-import": "error",
+            "import-x/no-cycle": ["error", {ignoreExternal: true}],
+            "import-x/no-duplicates": "error",
+            "import-x/no-self-import": "error",
+            "import-x/no-unresolved": "off",
+            "import-x/no-useless-path-segments": "error",
+            "import-x/order": [
+                "error",
+                {alphabetize: {order: "asc"}, "newlines-between": "always"},
+            ],
+            "import-x/unambiguous": "error",
+            "lines-around-directive": "error",
+            "new-cap": "error",
+            "no-alert": "error",
+            "no-bitwise": "error",
+            "no-caller": "error",
+            "no-constant-condition": ["error", {checkLoops: false}],
+            "no-else-return": "error",
+            "no-eval": "error",
+            "no-implicit-coercion": "error",
+            "no-jquery/no-append-html": "error",
+            "no-jquery/no-constructor-attributes": "error",
+            "no-jquery/no-parse-html-literal": "error",
+            "no-jquery/no-sizzle": ["error", {}],
+            "no-label-var": "error",
+            "no-labels": "error",
+            "no-multi-str": "error",
+            "no-new-func": "error",
+            "no-new-wrappers": "error",
+            "no-object-constructor": "error",
+            "no-octal-escape": "error",
+            "no-plusplus": "error",
+            "no-proto": "error",
+            "no-restricted-globals": ["error", ...confusingBrowserGlobals],
+            "no-return-assign": "error",
+            "no-script-url": "error",
+            "no-self-compare": "error",
+            "no-undef": "error",
+            "no-undef-init": "error",
+            "no-unneeded-ternary": ["error", {defaultAssignment: false}],
+            "no-useless-concat": "error",
+            "no-var": "error",
+            "object-shorthand": ["error", "always", {avoidExplicitReturnArrows: true}],
+            "one-var": ["error", "never"],
+            "prefer-arrow-callback": "error",
+            "prefer-const": ["error", {ignoreReadBeforeAssign: true}],
+            "promise/no-promise-in-callback": "off",
+            "promise/prefer-await-to-then": ["error", {strict: true}],
+            radix: "error",
+            "sort-imports": ["error", {ignoreDeclarationSort: true}],
+            "spaced-comment": ["error", "always", {markers: ["/"]}],
+            strict: "error",
+            "unicorn/consistent-boolean-name": "off",
+            "unicorn/consistent-class-member-order": "off",
+            "unicorn/consistent-function-scoping": "off",
+            "unicorn/dom-node-dataset": "off",
+            "unicorn/filename-case": "off",
+            "unicorn/max-nested-calls": "off",
+            "unicorn/name-replacements": "off",
+            "unicorn/no-await-expression-member": "off",
+            "unicorn/no-break-in-nested-loop": "off",
+            "unicorn/no-declarations-before-early-exit": "off",
+            "unicorn/no-duplicate-if-branches": "off",
+            "unicorn/no-negated-condition": "off",
+            "unicorn/no-null": "off",
+            "unicorn/no-process-exit": "off",
+            "unicorn/no-this-outside-of-class": "off",
+            "unicorn/no-top-level-assignment-in-function": "off",
+            "unicorn/no-top-level-side-effects": "off",
+            "unicorn/no-useless-undefined": "off",
+            "unicorn/numeric-separators-style": "off",
+            "unicorn/prefer-boolean-return": "off",
+            "unicorn/prefer-continue": "off",
+            "unicorn/prefer-dom-node-html-methods": "off",
+            "unicorn/prefer-early-return": "off",
+            "unicorn/prefer-includes-over-repeated-comparisons": "off",
+            "unicorn/prefer-global-this": "off",
+            "unicorn/prefer-https": "off",
+            "unicorn/prefer-minimal-ternary": "off",
+            "unicorn/prefer-number-coercion": "off",
+            "unicorn/prefer-private-class-fields": "off",
+            "unicorn/prefer-simple-condition-first": "off",
+            "unicorn/prefer-string-raw": "off",
+            "unicorn/prefer-ternary": "off",
+            "unicorn/prefer-top-level-await": "off",
+            "unicorn/prevent-abbreviations": "off",
+            "unicorn/single-line-block-comment-style": "off",
+            "unicorn/switch-case-braces": "off",
+            "valid-typeof": ["error", {requireStringLiterals: true}],
+            yoda: "error",
+        },
+    },
+    {
+        ignores: ["**/*.cts", "**/*.mts", "**/*.ts", "web/babel.config.js"],
+        extends: [tseslint.configs.disableTypeChecked],
+        rules: {
+            "@typescript-eslint/consistent-type-imports": "off",
+            "@typescript-eslint/explicit-function-return-type": "off",
+            "@typescript-eslint/no-require-imports": "off",
+            "consistent-return": "error",
+            "dot-notation": "error",
+            "no-implied-eval": "error",
+            "no-throw-literal": "error",
+        },
+    },
+    {
+        files: ["**/*.cjs"],
+        languageOptions: {
+            sourceType: "commonjs",
+        },
+    },
+    {
+        files: ["**/*.mdx"],
+        rules: {
+            "@typescript-eslint/no-unused-vars": "off",
+            "comma-spacing": "error",
+            "import-x/extensions": "off",
+            quotes: "error",
+        },
+    },
+    {
+        files: ["**/*.md", "**/*.mdx"],
+        rules: {
+            "import-x/unambiguous": "off",
+            "unicorn/no-empty-file": "off",
+        },
+    },
+    {
+        files: ["web/tests/**"],
+        rules: {
+            "@typescript-eslint/no-empty-function": "off",
+            "@typescript-eslint/no-extraneous-class": "off",
+            "no-jquery/no-selector-prop": "off",
+            "no-redeclare": "off",
+            "unicorn/no-global-object-property-assignment": "off",
+            "unicorn/no-useless-template-literals": "off",
+            "unicorn/require-array-sort-compare": "off",
+        },
+    },
+    {
+        files: ["web/e2e-tests/**"],
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+                zulip_test: "readonly",
+            },
+        },
+    },
+    {
+        files: ["**/*.d.ts"],
+        rules: {
+            "import-x/unambiguous": "off",
+        },
+    },
+    {
+        ignores: ["web/src/**"],
+        languageOptions: {
+            globals: globals.node,
+        },
+    },
+    {
+        files: ["web/tests/**"],
+        languageOptions: {
+            globals: {
+                CSS: "readonly",
+                document: "readonly",
+                navigator: "readonly",
+                window: "readonly",
+            },
+        },
+        rules: {
+            "formatjs/no-id": "off",
+            "new-cap": "off",
+            "unicorn/prefer-https": "off",
+        },
+    },
+    {
+        files: ["web/debug-require.cjs"],
+        rules: {
+            "no-var": "off",
+            "object-shorthand": "off",
+            "prefer-arrow-callback": "off",
+        },
+    },
+    {
+        files: ["web/src/**"],
+        settings: {
+            "import-x/resolver": {
+                webpack: {
+                    config: {},
+                },
+            },
+        },
+        rules: {
+            "no-console": "error",
+        },
+    },
+    {
+        files: ["web/src/**"],
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+                DEVELOPMENT: "readonly",
+                StripeCheckout: "readonly",
+                ZULIP_VERSION: "readonly",
+            },
+        },
+    },
+    {
+        files: ["starlight_help/src/scripts/client/**"],
+        rules: {
+            "unicorn/prefer-module": "off",
+        },
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+            },
+            sourceType: "script",
+        },
+    },
+    astroConfigs.recommended,
+    {
+        files: ["starlight_help/src/components/ZulipNote.astro"],
+        rules: {
+            "import-x/unambiguous": "off",
+        },
+    },
+    {
+        files: ["starlight_help/src/content/include/*"],
+        rules: {
+            // We need to turn off this rule since we want import statements
+            // to be easily copy-paste-able between content/include and
+            // content/docs.
+            "import-x/no-useless-path-segments": "off",
+        },
+    },
+);

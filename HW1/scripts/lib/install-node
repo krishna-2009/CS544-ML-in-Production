@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+version=24.19.0
+arch="$(uname -m)"
+
+case $arch in
+    x86_64)
+        tarball="node-v$version-linux-x64.tar.xz"
+        sha256=14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647
+        ;;
+
+    aarch64)
+        tarball="node-v$version-linux-arm64.tar.xz"
+        sha256=01443c1e1a29e531ccad5a46fefa6df490d2189c49f7955904aecdbb0fe86fdc
+        ;;
+esac
+
+check_version() {
+    out="$(node --version)" && [ "$out" = "v$version" ] \
+        && [ /usr/local/bin/pnpm -ef /srv/zulip-node/lib/node_modules/corepack/dist/pnpm.js ]
+}
+
+if ! check_version 2>/dev/null; then
+    set -x
+    tmpdir="$(mktemp -d)"
+    trap 'rm -r "$tmpdir"' EXIT
+    cd "$tmpdir"
+    curl -fLO --retry 3 "https://nodejs.org/dist/v$version/$tarball"
+    sha256sum -c <<<"$sha256 $tarball"
+    rm -rf /srv/zulip-node
+    mkdir -p /srv/zulip-node
+    tar -xJf "$tarball" --no-same-owner --strip-components=1 -C /srv/zulip-node
+    ln -sf /srv/zulip-node/bin/{corepack,node,npm,npx} /usr/local/bin
+    COREPACK_DEFAULT_TO_LATEST=0 /usr/local/bin/corepack enable
+
+    # Clean up after previous versions of this script
+    rm -rf /srv/zulip-yarn /usr/bin/yarn /usr/local/nvm
+
+    check_version
+fi
