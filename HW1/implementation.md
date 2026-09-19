@@ -1,5 +1,11 @@
 # Implementation
 
+## Demo video
+
+The demonstration video showing both HW1 features is available here:
+
+[HW1 feature demonstration video](https://uic.zoom.us/rec/share/4RcxRMhkabRCPuWiSTAdG4KsycSdlrRAKvAxKMMX4dBPJXgk5ODsfdedhV1HCoXX.Ia0NeOD6XLnfj8F_?startTime=1789793596000)
+
 Both features share one small LLM layer in
 [`zerver/actions/llm_features.py`](zerver/actions/llm_features.py): an
 OpenAI-compatible client built from Zulip's existing
@@ -16,9 +22,6 @@ clean API error instead of a 500 ([L20](zerver/views/llm_features.py#L20),
 [L33–35](zerver/views/llm_features.py#L33-L35)). Fourteen backend tests with a
 mocked provider live in
 [`zerver/tests/test_llm_features.py`](zerver/tests/test_llm_features.py).
-
-No demo video is included: per the UIC course staff, a video is not required
-for this submission.
 
 ## Feature 1: Message recap
 
@@ -51,9 +54,9 @@ then appends `[#id](link)` for each cited id **that exists in that map** —
 an id the model invents is silently dropped and can never become a link. If a
 model ignores the JSON format, `linkify_citations`
 ([L114–134](zerver/actions/llm_features.py#L114-L134)) falls back to scanning
-the prose for `[#12]`, `[12, 15]` or `【12†…】` and applies the same
-allow-list. The Markdown is rendered to HTML with Zulip's `markdown_convert`,
-exactly as the built-in topic-summary feature does
+the prose for `[#12]`, `[12, 15]` or `` and applies the same allow-list.
+The Markdown is rendered to HTML with Zulip's `markdown_convert`, exactly as
+the built-in topic-summary feature does
 ([L235–237](zerver/actions/llm_features.py#L235-L237)), and the response also
 carries a `references` array (id, sender, topic, link) for every message that
 was summarised. Across eight live runs against Groq every recap contained
@@ -103,21 +106,21 @@ interactive request.
 **Cost.** Every channel message would otherwise cost one model call. A
 per-topic cooldown in memcached
 ([L254–258](zerver/actions/llm_features.py#L254-L258),
-[L274–276, L297](zerver/actions/llm_features.py#L274-L297)) makes the number of
-calls proportional to *active topics per five minutes* instead of message
+[L274–276, L297](zerver/actions/llm_features.py#L274-L297)) makes the number
+of calls proportional to *active topics per five minutes* instead of message
 volume; the key is claimed before the call so a burst of sends cannot start
 several concurrent requests, and it is released if the call fails
-([L317–319](zerver/actions/llm_features.py#L317-L319)) so a transient error
-does not silence the feature. Topics with fewer than three messages are
-skipped without a call. The dev settings carry the model's per-token prices so
-Zulip's existing AI-cost accounting can be attached.
+([L317–319](zerver/actions/llm_features.py#L317-L319)) so a transient error does
+not silence the feature. Topics with fewer than three messages are skipped
+without a call. The dev settings carry the model's per-token prices so Zulip's
+existing AI-cost accounting can be attached.
 
 **Scalability.** Both features are stateless and add no schema, so they scale
-with the web tier; shared state is only the memcached cooldown. At Zulip
-scale I would move the drift check into a queue worker fed by the
-message-send path (deduplicating per topic), cache results per
-`(topic, last_message_id)`, add a per-user/realm token budget and a circuit
-breaker, and let organisations opt in per channel.
+with the web tier; shared state is only the memcached cooldown. At Zulip scale
+I would move the drift check into a queue worker fed by the message-send path
+(deduplicating per topic), cache results per `(topic, last_message_id)`, add a
+per-user/realm token budget and a circuit breaker, and let organisations opt in
+per channel.
 
 **Frontend.** `suggest_topic_title` in
 [`compose.ts` L178–222](web/src/compose.ts#L178-L222) posts to the endpoint;
